@@ -86,7 +86,6 @@ function compareObjects(obj1, obj2) {
   }
 
   return keys1.every((key) => {
-    // Проверяем наличие ключа во втором объекте и равенство значений
     return obj1[key] === obj2[key];
   });
 }
@@ -101,8 +100,8 @@ function compareObjects(obj1, obj2) {
  *    isEmptyObject({}) => true
  *    isEmptyObject({a: 1}) => false
  */
-function isEmptyObject(/* obj */) {
-  throw new Error('Not implemented');
+function isEmptyObject(obj) {
+  return !!Object.keys(obj).length;
 }
 
 /**
