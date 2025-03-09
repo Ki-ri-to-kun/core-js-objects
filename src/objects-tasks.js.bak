@@ -239,11 +239,8 @@ function getJSON(obj) {
  */
 function fromJSON(proto, json) {
   const data = JSON.parse(json);
-
   const obj = Object.create(proto);
-
   Object.assign(obj, data);
-
   return obj;
 }
 
@@ -273,8 +270,27 @@ function fromJSON(proto, json) {
  *      { country: 'Russia',  city: 'Saint Petersburg' }
  *    ]
  */
-function sortCitiesArray(/* arr */) {
-  throw new Error('Not implemented');
+function sortCitiesArray(arr) {
+  return arr.sort((a, b) => {
+    // Сначала сравниваем страны
+    if (a.country < b.country) {
+      return -1; // a должен быть перед b
+    }
+    if (a.country > b.country) {
+      return 1; // b должен быть перед a
+    }
+
+    // Если страны равны, сравниваем города
+    if (a.city < b.city) {
+      return -1; // a должен быть перед b
+    }
+    if (a.city > b.city) {
+      return 1; // b должен быть перед a
+    }
+
+    // Если и страны, и города равны, порядок не меняется
+    return 0;
+  });
 }
 
 /**
