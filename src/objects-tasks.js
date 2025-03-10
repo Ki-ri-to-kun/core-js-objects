@@ -390,32 +390,147 @@ function group(array, keySelector, valueSelector) {
  */
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  selectorParts: [],
+  hasElement: false,
+  hasId: false,
+  hasClass: false,
+  hasAttr: false,
+  hasPseudoClass: false,
+  hasPseudoElement: false,
+
+  clone(newState) {
+    this.hasElement = false;
+    this.hasId = false;
+    this.hasClass = false;
+    this.hasAttr = false;
+    this.hasPseudoClass = false;
+    this.hasPseudoElement = false;
+    return Object.assign(Object.create(cssSelectorBuilder), this, newState);
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  element(value) {
+    this.validateElement();
+    if (
+      this.hasId ||
+      this.hasClass ||
+      this.hasAttr ||
+      this.hasPseudoClass ||
+      this.hasPseudoElement
+    ) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    const obj = this.clone({
+      selectorParts: [...this.selectorParts, `${value}`],
+      hasElement: true,
+    });
+    return obj;
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    this.validateId();
+    if (
+      this.hasClass ||
+      this.hasAttr ||
+      this.hasPseudoClass ||
+      this.hasPseudoElement
+    ) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    const obj = this.clone({
+      selectorParts: [...this.selectorParts, `#${value}`],
+      hasId: true,
+    });
+    return obj;
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    if (this.hasAttr || this.hasPseudoClass || this.hasPseudoElement) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    const obj = this.clone({
+      selectorParts: [...this.selectorParts, `.${value}`],
+      hasClass: true,
+    });
+    return obj;
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    if (this.hasPseudoClass || this.hasPseudoElement) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    const obj = this.clone({
+      selectorParts: [...this.selectorParts, `[${value}]`],
+      hasAttr: true,
+    });
+    return obj;
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    if (this.hasPseudoElement) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+    const obj = this.clone({
+      selectorParts: [...this.selectorParts, `:${value}`],
+      hasPseudoClass: true,
+    });
+    return obj;
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    this.validatePseudoElement();
+    const obj = this.clone({
+      selectorParts: [...this.selectorParts, `::${value}`],
+      hasPseudoElement: true,
+    });
+    return obj;
+  },
+
+  combine(selector1, combinator, selector2) {
+    const obj = this.clone();
+
+    obj.selectorParts = [
+      ...this.selectorParts,
+      `${selector1.stringify()} ${combinator} ${selector2.stringify()}`,
+    ];
+    return obj;
+  },
+
+  stringify() {
+    return this.selectorParts.join('');
+  },
+
+  validateElement() {
+    if (this.hasElement) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector'
+      );
+    }
+  },
+
+  validateId() {
+    if (this.hasId) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector'
+      );
+    }
+  },
+
+  validatePseudoElement() {
+    if (this.hasPseudoElement) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector'
+      );
+    }
   },
 };
 
